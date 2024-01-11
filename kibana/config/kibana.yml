@@ -1,0 +1,20 @@
+---
+## Default Kibana configuration from Kibana base image.
+## https://github.com/elastic/kibana/blob/master/src/dev/build/tasks/os_packages/docker_generator/templates/kibana_yml.template.js
+#
+server.name: kibana
+server.host: 0.0.0.0
+elasticsearch.hosts: [ "http://elasticsearch:9200" ]
+monitoring.ui.container.elasticsearch.enabled: true
+
+## X-Pack security credentials
+#
+#elasticsearch.username: elastic
+#elasticsearch.password: rnjsxogjs@1
+elasticsearch.serviceAccountToken: AAEAAWVsYXN0aWMva2liYW5hL2tpYmFuYTp0cnI1OUZ2RVI2Ni1xT214Sms5enBn
+enterpriseSearch.host: 'http://enterprisesearch:3002'
+server.publicBaseUrl: 'http://maum.mooo.com:5601'
+
+xpack.encryptedSavedObjects.encryptionKey: ef344d8f556d6585d303c74539fe8372
+xpack.reporting.encryptionKey: e9834183f23eab6346c136c2e1e69935
+xpack.security.encryptionKey: 45b49dfba74c6c3dfc6505accc751ff6

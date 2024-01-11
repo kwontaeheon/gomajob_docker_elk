@@ -1,0 +1,45 @@
+---
+filebeat.inputs:
+- type: log
+  enabled: true
+  json.message_key:
+  json.keys_under_root: true
+  json.overwrite_keys: true
+  paths:
+  - "/var/log/enterprise-search/filebeat.log*"
+  - "/var/log/enterprise-search/ecs_api_requests.log*"
+  - "/var/log/enterprise-search/ecs_app_search_analytics.log*"
+  - "/var/log/enterprise-search/workplace_search_analytics.log*"
+output.elasticsearch:
+  hosts:
+  - http://elasticsearch:9200
+  headers:
+    Authorization: Basic ZWxhc3RpYzpybmpzeG9nanNAMQ==
+  indices:
+  - index: "%{[data_stream.type]}-%{[data_stream.dataset]}-%{[data_stream.namespace]}"
+  - index: ".ent-search-%{[event.dataset]}-ecs-ilm-logs-${RAILS_ENV:development}"
+  - index: ".ent-search-%{[labels.log_identifier]}-ecs-ilm-logs-${RAILS_ENV:development}"
+processors:
+- drop_event.when.and:
+  - not.has_fields:
+    - event.dataset
+  - not.has_fields:
+    - labels.log_identifier
+  - not.has_fields:
+    - data_stream.type
+    - data_stream.dataset
+    - data_stream.namespace
+- drop_event.when.has_fields:
+  - labels.skip_ingest
+logging:
+  level: info
+  to_files: true
+  files:
+    path: "/var/log/enterprise-search"
+    name: filebeat
+    keepfiles: 10
+    rotateeverybytes: 10485760
+    permissions: 416
+path.home: "/usr/share/enterprise-search/filebeat"
+setup.ilm.enabled: false
+setup.template.enabled: false

@@ -1,0 +1,151 @@
+version: '3.2'
+
+services:
+  elasticsearch:
+    build:
+      context: elasticsearch/
+      args:
+        ELK_VERSION: $ELK_VERSION
+    volumes:
+      - type: bind
+        source: ./elasticsearch/config
+        target: /usr/share/elasticsearch/config
+#      - type: bind
+#        source: ./elasticsearch/config/elasticsearch.yml
+#        target: /usr/share/elasticsearch/config/elasticsearch.yml
+#        read_only: true
+#      - type: bind
+#        source: ./elasticsearch/config/elastic-certificates.p12
+#        target: /usr/share/elasticsearch/config/elastic-certificates.p12
+#        read_only: true
+      - type: bind
+        source: ./elasticsearch/data
+        target: /usr/share/elasticsearch/data
+    ports:
+      - "9222:9200"
+    #   - "9300:9300"
+    environment:
+      ES_JAVA_OPTS: "-Xmx4096m -Xms256m"
+      ELASTIC_PASSWORD: rnjsxogjs@1
+      # Use single node discovery in order to disable production mode and avoid bootstrap checks.
+      # see: https://www.elastic.co/guide/en/elasticsearch/reference/current/bootstrap-checks.html
+      discovery.type: single-node
+    networks:
+      - elk
+  enterprisesearch:
+    build:
+      context: enterprisesearch/
+      args:
+        ELK_VERSION: $ELK_VERSION
+    ports:
+      - "3002:3002"
+    environment:
+      - SERVERNAME=enterprisesearch
+      - allow_es_settings_modification=true
+      - elasticsearch.host=http://elasticsearch:9200
+      - elasticsearch.username=elastic
+      - elasticsearch.password=rnjsxogjs@1
+      - kibana.external_url=http://kibana:5601
+    volumes:
+      - type: bind
+        source: ./enterprisesearch/config
+        target: /usr/share/enterprise-search/config
+      - type: bind
+        source: ./enterprisesearch/ent-search-filebeat.yml
+        target: /usr/share/enterprise-search/tmp/ent-search-filebeat.yml
+    networks:
+      - elk
+    depends_on:
+      - elasticsearch
+      - kibana
+
+  logstash:
+    build:
+      context: logstash/
+      args:
+        ELK_VERSION: $ELK_VERSION
+    volumes:
+      - type: bind
+        source: ./logstash/config/logstash.yml
+        target: /usr/share/logstash/config/logstash.yml
+        read_only: true
+      - type: bind
+        source: ./logstash/config/pipelines.yml
+        target: /usr/share/logstash/config/pipelines.yml
+        read_only: true
+      - type: bind
+        source: ./logstash/data/filebeat_config/filebeat.yml
+        target: /etc/filebeat/filebeat.yml
+      - type: bind
+        source: ./logstash/pipeline
+        target: /usr/share/logstash/pipeline
+        read_only: true
+      - "./logstash/data:/usr/share/logstash/shared_data"
+    ports:
+      - "5044:5044"
+      - "5000:5000/tcp"
+      - "5000:5000/udp"
+      - "9600:9600"
+    environment:
+      LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+    networks:
+      - elk
+    depends_on:
+      - elasticsearch
+
+  kibana:
+    build:
+      context: kibana/
+      args:
+        ELK_VERSION: $ELK_VERSION
+    volumes:
+      - type: bind
+        source: ./kibana/config/kibana.yml
+        target: /usr/share/kibana/config/kibana.yml
+        read_only: true
+    ports:
+      - "5601:5601"
+    networks:
+      - elk
+    depends_on:
+      - elasticsearch
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - "443:443"
+      - "80:80"
+    depends_on:
+      - enterprisesearch
+    links:
+      - enterprisesearch:enterprisesearch
+    volumes:
+      #- /home/terry/code/docker/known/docker-known/default.conf:/etc/nginx/conf.d/default.conf
+      #- /etc/letsencrypt/live/maum.mooo.com:/etc/ssl
+      - /etc/letsencrypt/archive/maum.mooo.com/cert${CERT_VERSION}.pem:/etc/ssl/cert.pem:ro
+      - /etc/letsencrypt/archive/maum.mooo.com/chain${CERT_VERSION}.pem:/etc/ssl/chain.pem:ro
+      - /etc/letsencrypt/archive/maum.mooo.com/fullchain${CERT_VERSION}.pem:/etc/ssl/fullchain.pem:ro
+      - /etc/letsencrypt/archive/maum.mooo.com/privkey${CERT_VERSION}.pem:/etc/ssl/privkey.pem:ro
+      - /etc/nginx/snippets:/etc/nginx/snippets
+      - type: bind
+        source: ./nginx/nginx.conf
+        target: /etc/nginx/nginx.conf
+        read_only: true
+      - type: bind
+        source: ./nginx/web.conf
+        target: /etc/nginx/web.conf
+        read_only: true
+      - type: bind
+        source: ./nginx/server-https-common.conf
+        target: /etc/nginx/server-https-common.conf
+        read_only: true
+    restart: always
+    networks:
+      - elk
+
+networks:
+  elk:
+    driver: bridge
+
+volumes:
+  elasticsearch:

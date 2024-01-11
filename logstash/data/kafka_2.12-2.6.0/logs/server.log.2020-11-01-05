@@ -1,0 +1,4 @@
+[2020-11-01 05:06:50,749] INFO [GroupMetadataManager brokerId=0] Removed 0 expired offsets in 0 milliseconds. (kafka.coordinator.group.GroupMetadataManager)
+[2020-11-01 05:11:41,437] INFO [GroupCoordinator 0]: Member[group.instance.id None, member.id logstash-0-2b85cf48-491b-4357-9958-e873866fb0eb] in group logstash has left, removing it from the group (kafka.coordinator.group.GroupCoordinator)
+[2020-11-01 05:11:41,438] INFO [GroupCoordinator 0]: Preparing to rebalance group logstash in state PreparingRebalance with old generation 12 (__consumer_offsets-49) (reason: removing member logstash-0-2b85cf48-491b-4357-9958-e873866fb0eb on LeaveGroup) (kafka.coordinator.group.GroupCoordinator)
+[2020-11-01 05:11:41,438] INFO [GroupCoordinator 0]: Group logstash with generation 13 is now empty (__consumer_offsets-49) (kafka.coordinator.group.GroupCoordinator)

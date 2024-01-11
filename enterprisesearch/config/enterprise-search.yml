@@ -1,0 +1,14 @@
+allow_es_settings_modification: true
+elasticsearch.host: http://elasticsearch:9200
+elasticsearch.password: rnjsxogjs@1
+elasticsearch.username: elastic
+ent_search.listen_host: 0.0.0.0
+filebeat_log_directory: /var/log/enterprise-search
+log_directory: /var/log/enterprise-search
+log_level: warn
+enable_stdout_app_logging: false
+metricbeat_log_directory: /var/log/enterprise-search
+secret_management.encryption_keys: [b12c7715348504686d2fd82528af893bdcd948a6226775cc6b3146a5820485c8]
+kibana.external_url: http://maum.mooo.com:5601
+ent_search.external_url: http://maum.mooo.com:3002
+crawler.crawl.max_crawl_depth.limit: 1000

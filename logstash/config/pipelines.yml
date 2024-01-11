@@ -1,0 +1,17 @@
+# This file is where you define your pipelines. You can define multiple.
+# For more information on multiple pipelines, see the documentation:
+#   https://www.elastic.co/guide/en/logstash/current/multiple-pipelines.html
+
+#- pipeline.id: main
+# path.config: "/usr/share/logstash/pipeline/logstash.conf"
+  #path.data: "/usr/share/logstash/shared_data/pipeline_main"
+
+- pipeline.id: my-pipeline_1
+  path.config: "/usr/share/logstash/pipeline/logstash-sample.conf"
+  pipeline.workers: 3
+  #path.data: "/usr/share/logstash/shared_data/pipeline_my1"
+
+#- pipeline.id: my-other-pipeline
+#  path.config: "/etc/different/path/p2.cfg"
+#  queue.type: persisted
+
